@@ -29,7 +29,7 @@ import { PokemonCardSkeleton } from '../pokemon-card-skeleton/pokemon-card-skele
           [attr.aria-invalid]="hasNameError()"
           [formField]="searchForm.name"
         />
-        <p class="mt-1 min-h-[1.25rem] text-sm text-red-600" role="alert">
+        <p class="mt-1 min-h-5 text-sm text-red-600" role="alert">
           @if (hasNameError()) {
             {{ searchForm.name().errors()[0].message }}
           }
@@ -145,6 +145,9 @@ export default class AllPokemon {
     minLength(s.name, 2, { message: 'Type at least 2 characters' });
     debounce(s.name, 300);
   });
+  protected hasNameError = computed(
+    () => this.searchForm.name().touched() && this.searchForm.name().errors().length > 0,
+  );
 
   protected params = signal<PokemonListParams>({ limit: 151, offset: 0 });
   protected allPokemon = this.pokemonService.getAllPokemon(this.params);
