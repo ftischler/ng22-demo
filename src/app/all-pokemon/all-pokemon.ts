@@ -26,6 +26,8 @@ import { PokemonCardSkeleton } from '../pokemon-card-skeleton/pokemon-card-skele
           class="mt-1 w-full max-w-sm rounded-lg border px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           [class.border-slate-300]="!hasNameError()"
           [class.border-red-600]="hasNameError()"
+          // v22: comments inside HTML elements — flag the field invalid for assistive tech
+          // only once it is touched and failing validation.
           [attr.aria-invalid]="hasNameError()"
           [formField]="searchForm.name"
         />
@@ -43,26 +45,34 @@ import { PokemonCardSkeleton } from '../pokemon-card-skeleton/pokemon-card-skele
         aria-label="Filter by type"
         class="mb-6 flex flex-wrap gap-2"
       >
-        <li
-          ngOption
-          value=""
-          class="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1 text-sm text-slate-700 aria-selected:border-blue-600 aria-selected:bg-blue-600 aria-selected:font-semibold aria-selected:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-        >
-          All
-        </li>
+        <!-- v22: @let declares the shared chip class list; spread syntax in templates adds
+             'capitalize' inline for type names only. -->
+        @let chipClass = [
+          'cursor-pointer',
+          'rounded-full',
+          'border',
+          'border-slate-300',
+          'bg-white',
+          'px-3',
+          'py-1',
+          'text-sm',
+          'text-slate-700',
+          'aria-selected:border-blue-600',
+          'aria-selected:bg-blue-600',
+          'aria-selected:font-semibold',
+          'aria-selected:text-white',
+          'focus-visible:outline-2',
+          'focus-visible:outline-offset-2',
+          'focus-visible:outline-blue-600',
+        ];
+        <li ngOption value="" [class]="chipClass">All</li>
         @for (type of types; track type) {
-          <li
-            ngOption
-            [value]="type"
-            class="cursor-pointer rounded-full border border-slate-300 bg-white px-3 py-1 text-sm capitalize text-slate-700 aria-selected:border-blue-600 aria-selected:bg-blue-600 aria-selected:font-semibold aria-selected:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-          >
-            {{ type }}
-          </li>
+          <li ngOption [value]="type" [class]="[...chipClass, 'capitalize']">{{ type }}</li>
         }
       </ul>
 
       @if (allPokemon.isLoading() || byType.isLoading()) {
-        <!-- v22: animate.leave fades the skeleton grid out as it is removed from the DOM. -->
+        <!-- Angular 20.2+: animate.leave fades the skeleton grid out as it is removed from the DOM. -->
         <ul
           animate.leave="grid-leave"
           class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
@@ -86,11 +96,9 @@ import { PokemonCardSkeleton } from '../pokemon-card-skeleton/pokemon-card-skele
         </div>
       } @else {
         <ul class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          @for (p of cards(); track p.id) {
-            <!-- v22: animate.enter runs the .card-enter animation each time a card is
-                 inserted — on first load and whenever a filter changes the result set. -->
+          @for (p of cards(); track p.id; let idx = $index) {
             <li animate.enter="card-enter">
-              <app-pokemon-card [card]="p" />
+              <app-pokemon-card [card]="p" [priority]="idx < 6" />
             </li>
           } @empty {
             <li class="col-span-full text-slate-500">No Pokémon found.</li>

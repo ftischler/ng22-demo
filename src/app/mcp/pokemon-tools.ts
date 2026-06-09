@@ -24,18 +24,22 @@ export const pokemonMcpTools: WebMcpToolDescriptor<{
     },
     execute: async (args) => {
       const http = inject(HttpClient);
-      const pokemon = await firstValueFrom(
-        http.get<Pokemon>(`${BASE_URL}/pokemon/${args.name.toLowerCase()}`),
-      );
-      return JSON.stringify({
-        id: pokemon.id,
-        name: pokemon.name,
-        height: pokemon.height,
-        weight: pokemon.weight,
-        types: pokemon.types.map((t) => t.type.name),
-        abilities: pokemon.abilities.map((a) => a.ability.name),
-        stats: pokemon.stats.map((s) => ({ name: s.stat.name, value: s.base_stat })),
-      });
+      try {
+        const pokemon = await firstValueFrom(
+          http.get<Pokemon>(`${BASE_URL}/pokemon/${args.name.toLowerCase()}`),
+        );
+        return JSON.stringify({
+          id: pokemon.id,
+          name: pokemon.name,
+          height: pokemon.height,
+          weight: pokemon.weight,
+          types: pokemon.types.map((t) => t.type.name),
+          abilities: pokemon.abilities.map((a) => a.ability.name),
+          stats: pokemon.stats.map((s) => ({ name: s.stat.name, value: s.base_stat })),
+        });
+      } catch {
+        return JSON.stringify({ error: `No Pokémon found for "${args.name}".` });
+      }
     },
   },
 ];

@@ -18,6 +18,7 @@ import { PokemonCard as PokemonCardModel } from '../models/pokemon-card';
         [alt]="c.name"
         width="96"
         height="96"
+        [priority]="priority()"
         class="h-24 w-24 object-contain"
       />
       <span class="mt-2 text-xs font-medium text-slate-400">#{{ c.id }}</span>
@@ -27,4 +28,5 @@ import { PokemonCard as PokemonCardModel } from '../models/pokemon-card';
 })
 export class PokemonCard {
   readonly card = input.required<PokemonCardModel>();
+  readonly priority = input(false);
 }

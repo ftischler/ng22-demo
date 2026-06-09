@@ -6,6 +6,7 @@ import {
 import {
   provideRouter,
   withComponentInputBinding,
+  withExperimentalAutoCleanupInjectors,
   withExperimentalPlatformNavigation,
 } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
@@ -16,10 +17,15 @@ import { pokemonMcpTools } from './mcp/pokemon-tools';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    // withComponentInputBinding(): route params -> signal inputs (PokemonDetail.name).
     // v22 (experimental): withExperimentalPlatformNavigation() aligns the router with the
-    // native browser Navigation API.
-    provideRouter(routes, withComponentInputBinding(), withExperimentalPlatformNavigation()),
+    // native browser Navigation API; withExperimentalAutoCleanupInjectors() destroys the
+    // injectors of inactive lazy routes to prevent memory leaks.
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withExperimentalPlatformNavigation(),
+      withExperimentalAutoCleanupInjectors(),
+    ),
     provideHttpClient(),
     // v22 (experimental): register WebMCP tools for AI agents.
     provideExperimentalWebMcpTools(pokemonMcpTools),
