@@ -1,59 +1,69 @@
-# Ng22Demo
+# ng22-demo — Angular 22 Feature Showcase
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.0.
+A small Pokédex app (data from [PokéAPI](https://pokeapi.co)) built to demonstrate the
+headline features of **Angular 22**. Every feature below is wired into a real, working
+screen — not a standalone snippet.
 
-## Development server
+## Stack
 
-To start a local development server, run:
+- Angular **22.0**
+- `@angular/aria` 22 (accessible headless primitives)
+- Tailwind CSS 4
+- TypeScript 6
+- Zoneless + OnPush by default
 
-```bash
-ng serve
+## What it does
+
+- **List page (`/`)** — Gen-1 Pokémon grid with name search, type filter, and links to detail.
+- **Detail page (`/pokemon/:name`)** — sprite, types, tabbed stats/abilities/moves, and a
+  show/hide evolution-chain toggle.
+
+## Demonstrated Angular 22 features
+
+| Feature | Status | Where | What to look at |
+| --- | --- | --- | --- |
+| `httpResource()` | stable | `services/pokemon-service.ts` | Signal-driven HTTP; URL `undefined` ⇒ request skipped |
+| `@Service()` | stable | `services/pokemon-service.ts`, `services/evolution-service.ts` | Replaces `@Injectable({ providedIn: 'root' })` |
+| OnPush by default | stable | `all-pokemon/all-pokemon.ts` | No `changeDetection` set — it's the new default |
+| Signal Forms | stable | `all-pokemon/all-pokemon.ts` | `form()`, `minLength()`, `[formField]`, `debounce()` |
+| `debounce()` (forms) | stable | `all-pokemon/all-pokemon.ts` | Delays model sync of the search field by 300 ms |
+| Angular Aria — Listbox | stable | `all-pokemon/all-pokemon.ts` | `ngListbox`/`ngOption` type filter (value is `V[]`) |
+| Angular Aria — Tabs | stable | `pokemon-detail/pokemon-detail.ts` | `ngTabs`/`ngTabList`/`ngTabPanel`/`ngTabContent` |
+| `@switch` multi-case + exhaustive | stable | `pokemon-type-badge/pokemon-type-badge.ts` | Stacked `@case` fallthrough (shared color) + `@default never` exhaustiveness over the type union |
+| `@let` template binding | stable | `pokemon-type-badge/pokemon-type-badge.ts` | Binds the signal read to a local so `@switch` can narrow it |
+| `injectAsync()` + `onIdle` | stable | `pokemon-detail/pokemon-detail.ts` | Lazy-injected `EvolutionService` (own chunk), idle prefetch |
+| `isActive()` router signal | stable | `app.ts` | `Signal<boolean>` for nav highlight |
+| `withComponentInputBinding()` | stable | `app.config.ts` | Route param `:name` → signal `input.required()` |
+| `withExperimentalPlatformNavigation()` | experimental | `app.config.ts` | Router on the native browser Navigation API |
+| WebMCP (`provideExperimentalWebMcpTools`) | experimental | `mcp/pokemon-tools.ts`, `app.config.ts` | `get_pokemon` tool exposed to AI agents |
+
+> Lazy code-splitting is visible in `ng build`: `all-pokemon`, `pokemon-detail`, and
+> `evolution-service` each emit their own chunk.
+
+## Project structure
+
+```
+src/app/
+  all-pokemon/        list page (Signal Forms + Aria Listbox + httpResource)
+  pokemon-detail/     detail page (Aria Tabs + injectAsync)
+  services/           PokemonService, EvolutionService (@Service)
+  mcp/                WebMCP tool descriptors
+  models/             typed PokéAPI responses + view models
+  util/               toPokemonCard mapper
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Run
 
 ```bash
-ng generate component component-name
+pnpm install
+pnpm start        # dev server on http://localhost:4200
+pnpm build        # production build
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Notes
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- `@Service()` and `httpResource()` are intentional v22 idioms, not legacy `@Injectable`/`HttpClient`.
+- Experimental features (`withExperimentalPlatformNavigation`, WebMCP) are flagged as such and
+  may change in future releases.
+- Pokémon sprites are loaded with `NgOptimizedImage` (`ngSrc`); all interactive elements carry
+  ARIA roles/labels and visible focus states to satisfy WCAG AA.
