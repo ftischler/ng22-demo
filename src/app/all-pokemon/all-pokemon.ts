@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, debounced, effect, inject, signal } from '@angular/core';
 import { form, FormField, minLength, debounce } from '@angular/forms/signals';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { PokemonService } from '../services/pokemon-service';
@@ -98,7 +98,7 @@ import { PokemonCardSkeleton } from '../pokemon-card-skeleton/pokemon-card-skele
         <ul class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           @for (p of cards(); track p.id; let idx = $index) {
             <li animate.enter="card-enter">
-              <app-pokemon-card [card]="p" [priority]="idx < 6" />
+              <app-pokemon-card [card]="p" />
             </li>
           } @empty {
             <li class="col-span-full text-slate-500">No Pokémon found.</li>
@@ -157,6 +157,11 @@ export default class AllPokemon {
     () => this.searchForm.name().touched() && this.searchForm.name().errors().length > 0,
   );
 
+  protected search = computed(() => this.searchModel().name);
+
+  // v22 (stable): Create a debounced resource from a signal
+  protected debouncedSearch = debounced(this.search, 300);
+
   protected params = signal<PokemonListParams>({ limit: 151, offset: 0 });
   protected allPokemon = this.pokemonService.getAllPokemon(this.params);
   protected byType = this.pokemonService.getPokemonByType(this.selectedType);
@@ -170,4 +175,10 @@ export default class AllPokemon {
     const filtered = query.length >= 2 ? entries.filter((e) => e.name.includes(query)) : entries;
     return filtered.map(toPokemonCard);
   });
+
+  constructor() {
+    effect(() => {
+      console.log(this.debouncedSearch.value());
+    });
+  }
 }
