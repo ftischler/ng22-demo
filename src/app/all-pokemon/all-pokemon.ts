@@ -1,5 +1,5 @@
-import { Component, computed, debounced, effect, inject, signal } from '@angular/core';
-import { form, FormField, minLength, debounce } from '@angular/forms/signals';
+import { Component, computed, debounced, inject, signal } from '@angular/core';
+import { form, FormField, minLength } from '@angular/forms/signals';
 import { Listbox, Option } from '@angular/aria/listbox';
 import { PokemonService } from '../services/pokemon-service';
 import { PokemonListParams } from '../models/pokemon-list';
@@ -36,6 +36,9 @@ import { PokemonCardSkeleton } from '../pokemon-card-skeleton/pokemon-card-skele
             {{ searchForm.name().errors()[0].message }}
           }
         </p>
+        @if (isSearchPending()) {
+          <p class="text-sm text-slate-500">Updating results…</p>
+        }
       </form>
 
       <ul
@@ -147,11 +150,10 @@ export default class AllPokemon {
   protected selectedType = computed(() => this.selectedTypes()[0] || null);
 
   // v22 (stable): Signal Forms. The model signal is the source of truth; form() derives
-  // its structure from it. minLength() adds validation, debounce() delays model sync.
+  // its structure from it, and minLength() keeps validation beside the field definition.
   protected searchModel = signal({ name: '' });
   protected searchForm = form(this.searchModel, (s) => {
     minLength(s.name, 2, { message: 'Type at least 2 characters' });
-    debounce(s.name, 300);
   });
   protected hasNameError = computed(
     () => this.searchForm.name().touched() && this.searchForm.name().errors().length > 0,
@@ -159,8 +161,10 @@ export default class AllPokemon {
 
   protected search = computed(() => this.searchModel().name);
 
-  // v22 (stable): Create a debounced resource from a signal
+  // v22 (experimental): debounced() wraps the raw query signal in a Resource whose value()
+  // settles after 300 ms; status() lets the UI react while a new value is pending.
   protected debouncedSearch = debounced(this.search, 300);
+  protected isSearchPending = computed(() => this.debouncedSearch.status() === 'loading');
 
   protected params = signal<PokemonListParams>({ limit: 151, offset: 0 });
   protected allPokemon = this.pokemonService.getAllPokemon(this.params);
@@ -171,14 +175,8 @@ export default class AllPokemon {
     const entries = type
       ? this.byType.value().pokemon.map((slot) => slot.pokemon)
       : this.allPokemon.value().results;
-    const query = this.searchModel().name.trim().toLowerCase();
+    const query = this.debouncedSearch.value().trim().toLowerCase();
     const filtered = query.length >= 2 ? entries.filter((e) => e.name.includes(query)) : entries;
     return filtered.map(toPokemonCard);
   });
-
-  constructor() {
-    effect(() => {
-      console.log(this.debouncedSearch.value());
-    });
-  }
 }

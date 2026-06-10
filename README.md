@@ -1,5 +1,14 @@
 # ng22-demo — Angular 22 Feature Showcase
 
+<p align="center">
+  <strong>Sources</strong><br>
+  <a href="https://blog.angular.dev/announcing-angular-v22-c52bb83a4664">Angular v22 announcement</a> ·
+  <a href="https://www.angulararchitects.io/blog/angular-22-die-wichtigsten-neuen-features-im-ueberblick/">Angular 22 feature overview</a> ·
+  <a href="https://angular.dev/events/v22">Angular v22 event</a><br>
+  <strong>Signal Forms</strong><br>
+  <a href="https://www.angulararchitects.io/blog/all-about-angulars-new-signal-forms/">All about Angular's new Signal Forms</a>
+</p>
+
 A small Pokédex app (data from [PokéAPI](https://pokeapi.co)) built to demonstrate the
 headline features of **Angular 22**. Every feature below is wired into a real, working
 screen — not a standalone snippet.
@@ -26,8 +35,8 @@ screen — not a standalone snippet.
 | `httpResource()`                          | stable | `services/pokemon-service.ts` | Signal-driven HTTP; URL `undefined` ⇒ request skipped                                            |
 | `@Service()`                              | stable | `services/pokemon-service.ts`, `services/evolution-service.ts` | Replaces `@Injectable({ providedIn: 'root' })`                                                   |
 | OnPush by default                         | stable | `all-pokemon/all-pokemon.ts` | No `changeDetection` set — it's the new default                                                  |
-| Signal Forms                              | stable | `all-pokemon/all-pokemon.ts` | `form()`, `minLength()`, `[formField]`, `debounce()`                                             |
-| `debounced()` (Resource)                  | stable | `all-pokemon/all-pokemon.ts` | Creates a debounces resource from a signal                                                       |
+| Signal Forms                              | stable | `all-pokemon/all-pokemon.ts` | `form()`, `minLength()`, `[formField]`                                                           |
+| `debounced()`                             | experimental | `all-pokemon/all-pokemon.ts` | Wraps the search signal in a `Resource`; `value()` drives filtering and `status()` shows pending updates |
 | Angular Aria — Listbox                    | stable | `all-pokemon/all-pokemon.ts` | `ngListbox`/`ngOption` type filter (value is `V[]`)                                              |
 | Angular Aria — Tabs                       | stable | `pokemon-detail/pokemon-detail.ts` | `ngTabs`/`ngTabList`/`ngTabPanel`/`ngTabContent`                                                 |
 | `@switch` multi-case + exhaustive         | stable | `pokemon-type-badge/pokemon-type-badge.ts` | Stacked `@case` fallthrough (shared color) + `@default never` exhaustiveness over the type union |
